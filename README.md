@@ -1,2 +1,2 @@
 # ssh-log-plot
-Plot the location successful and unsuccessful SSH login attemps
+Plot the location of successful and unsuccessful SSH login attemps
