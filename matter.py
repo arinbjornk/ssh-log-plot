@@ -28,15 +28,13 @@ for i in range(len(iplist)):
     response = urllib.urlopen(url).read().decode('utf-8')
     data = json.loads(response)
     # print(data['lat'])
-    coord.append([data['lat'], data['lon'], data['city']])
+    coord.append([data['lat'], data['lon'], data['city'], 2 + (iplist[i][1] / 10)])
 
 # Create map
 m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90,
             llcrnrlon=-180, urcrnrlon=180, resolution='l')
 x, y = m([int(i[1]) for i in coord], [int(i[0]) for i in coord])
-# m.bluemarble()
 m.drawmapboundary(fill_color='w')
-m.fillcontinents(color='k', lake_color='w')
-m.scatter(x, y, 3, marker='o', color='r', zorder=10)
-
-plt.savefig('image.svg', format='svg')
+m.fillcontinents(color='#424242', lake_color='w')
+m.scatter(x, y, [int(i[3]) for i in coord], marker='o', color='#FF5722', alpha=0.7, zorder=10)
+plt.savefig('image.svg', format='svg', bbox_inches='tight')
