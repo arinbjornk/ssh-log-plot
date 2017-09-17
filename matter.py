@@ -1,6 +1,8 @@
 import os
+import binascii
 import re
 import urllib
+import datetime
 import collections
 import json
 import matplotlib
@@ -37,4 +39,10 @@ x, y = m([int(i[1]) for i in coord], [int(i[0]) for i in coord])
 m.drawmapboundary(fill_color='w')
 m.fillcontinents(color='#424242', lake_color='w')
 m.scatter(x, y, [int(i[3]) for i in coord], marker='o', color='#FF5722', alpha=0.7, zorder=10)
-plt.savefig('image.svg', format='svg', bbox_inches='tight')
+plt.axis('off')
+plt.savefig("now.svg", format='svg', transparent=True, bbox_inches='tight')
+
+# Save in www folder
+oldfilename = "connections_" + binascii.b2a_hex(os.urandom(6)) + ".svg"
+os.rename("/var/www/logplots/now.svg", "/var/www/logplots/" + oldfilename)
+os.rename("now.svg", "/var/www/logplots/now.svg")
