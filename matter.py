@@ -3,16 +3,24 @@ import binascii
 import re
 import urllib
 import datetime
+import time
 import collections
 import json
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+import sys
+
+
+def tochunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
 
 # Get current external IP
-my_ip = urllib.urlopen('http://ident.me').read().decode('utf8')
-print(my_ip)
+# my_ip = urllib.urlopen('http://ident.me').read().decode('utf8')
+# print(my_ip)
 
 # Get list of all IPs in authentication log
 with open('/var/log/auth.log', 'r') as f:
@@ -23,6 +31,14 @@ ip_log = re.findall(r'[0-9]+(?:\.[0-9]+){3}', output)
 counter = collections.Counter(ip_log)
 iplist = [[k, v] for k, v in counter.items()]
 
+# Create batches of ip address queries
+chunk = []
+for item in iplist:
+    chunk.append(json.dumps({'query': item[0]}))
+batch = list(tochunks(chunk, 100))
+
+sys.exit()
+
 # Get lat an lon of each IP
 coord = []
 for i in range(len(iplist)):
@@ -30,7 +46,10 @@ for i in range(len(iplist)):
     response = urllib.urlopen(url).read().decode('utf-8')
     data = json.loads(response)
     # print(data['lat'])
-    coord.append([data['lat'], data['lon'], data['city'], 2 + (iplist[i][1] / 10)])
+    if(data['status'] == 'success'):
+        coord.append([data['lat'], data['lon'], data['city'], 2 + (iplist[i][1] / 10)])
+    if i % 130 == 0:  # To prevent api server block
+        time.sleep(60)
 
 # Create map
 m = Basemap(projection='cyl', llcrnrlat=-90, urcrnrlat=90,
